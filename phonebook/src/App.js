@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import Form from './components/Form'
+import Person from './components/Person'
 
-const Person = ({person}) => <p>{person.name} - {person.phone}</p>
 const Filter = ({search, handleSearch}) => <div>search person: <input type="text" value={search} onChange={handleSearch}/></div>
 
 const App = () => {
@@ -14,7 +14,7 @@ const App = () => {
   const [ newName, setNewName ] = useState('')
   const [ newPhone, setNewPhone] = useState('')
   const [search, setSearch] = useState('')
-  const [searchedPersons, setSearchedPersons] = useState([])
+  const [showSearch, setShowSearch] = useState(false)
 
   const handleNameInput = (e) => {
 	  setNewName(e.target.value)	
@@ -28,15 +28,12 @@ const App = () => {
     setNewName('')
     setNewPhone('')
     setSearch('')
+    setShowSearch(false)
   }
 
   const handleSearch = (e) => {
-    let q = e.target.value
-    setSearch(q)
-    const searchResult = persons.filter(person => {
-      return person.name.toLowerCase().includes(q.toLowerCase())
-    })
-    setSearchedPersons(searchResult)
+    setSearch(e.target.value)
+    if(e.target.value) setShowSearch(true)
   }
 
   const handleSubmit = (e) => {
@@ -54,6 +51,10 @@ const App = () => {
     clearForm()
   }
 
+  const searchedPersons = showSearch
+  ? persons.filter(person =>  person.name.toLowerCase().includes(search.toLowerCase()))
+  : persons
+
   return (
     <div>
       <h1>Phonebook</h1>
@@ -68,10 +69,9 @@ const App = () => {
       />
       <h2>Numbers</h2>
       <div>
-      {searchedPersons.length 
-        ? searchedPersons.map((person) => <Person key={person.name} person={person} />)
-        : persons.map((person) => <Person key={person.name} person={person} />)
-      }
+      {searchedPersons.map((person) => 
+        <Person key={person.name} person={person} />
+      )}
       </div>
     </div>
   )

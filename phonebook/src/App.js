@@ -22,6 +22,21 @@ const App = () => {
       })
   }, [])
 
+  /* 
+    divided to follow it in real time what is like to use promises in js
+    useEffect(() => {
+      console.log('effect)
+
+      const eventHandler = response => {
+        console.log('promise fullfilled')
+        setNotes(response.data)
+      }
+
+      const promise = axios.get('http://localhost:3001/notes')
+      promise.then(eventHandler)
+    }, [])
+  */
+
   const handleNameInput = (e) => {
 	  setNewName(e.target.value)	
   }

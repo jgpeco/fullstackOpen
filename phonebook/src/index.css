@@ -1,0 +1,17 @@
+.notification-success,
+.notifcation-error {
+  font-size: 1.5rem;
+  background-color: lightgrey;
+  border: 1px solid lightskyblue;
+  padding: 1rem;
+  margin: 1rem;
+}
+
+.notification-success {
+  color: green;
+}
+
+.notification-error {
+  color: red;
+  font-weight: bold;
+}

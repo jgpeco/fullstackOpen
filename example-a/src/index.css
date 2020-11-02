@@ -1,0 +1,17 @@
+.note {
+  background-color: aquamarine;
+  color: blue;
+  font-size: 2rem;
+  padding: 1.2rem;
+  margin: 1rem;
+}
+
+.error {
+  color: red;
+  background: lightgrey;
+  font-size: 2rem;
+  font-weight: bold;
+  border: 1px solid black;
+  border-radius: 5px;
+  margin-bottom: 1.5rem;
+}

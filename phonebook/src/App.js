@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
 import Form from './components/Form'
 import Person from './components/Person'
+import personsService from './services/persons'
 
 const Filter = ({search, handleSearch}) => <div>search person: <input type="text" value={search} onChange={handleSearch}/></div>
 
@@ -14,28 +14,12 @@ const App = () => {
  
   //fetching data from db.json
   useEffect(() => {
-    axios
-      .get('http://localhost:3001/persons')
-      .then((response) => {
-        const persons = response.data
-        setPersons(persons)
+    personsService
+      .getAll()
+      .then(personsData => {
+        setPersons(personsData)
       })
   }, [])
-
-  /* 
-    divided to follow it in real time what is like to use promises in js
-    useEffect(() => {
-      console.log('effect)
-
-      const eventHandler = response => {
-        console.log('promise fullfilled')
-        setNotes(response.data)
-      }
-
-      const promise = axios.get('http://localhost:3001/notes')
-      promise.then(eventHandler)
-    }, [])
-  */
 
   const handleNameInput = (e) => {
 	  setNewName(e.target.value)	
@@ -62,14 +46,40 @@ const App = () => {
     const newPerson = {
       name: newName,
       phone: newPhone,
+    }
+    
+    const personOnList = persons.find((person) => person.name.toLowerCase() === newPerson.name.toLowerCase()) 
+    if(personOnList){
+
+      if(window.confirm(`${newPerson.name} is already on the list. Update it's number?`)){
+        const updatedPerson = {...personOnList, phone: newPerson.phone}
+        personsService
+          .update(updatedPerson.id, updatedPerson)
+          .then(returnedPerson => {
+            setPersons(persons.map(person => person.id !== returnedPerson.id ? person : returnedPerson))
+            clearForm()
+          })            
       }
-      if(persons.find((person) => person.name === newPerson.name)){
-          alert(`${newName} is already on the list!`)
-          clearForm()
-          return null
-      }
-    setPersons(persons.concat(newPerson))
-    clearForm()
+      return null
+    }
+    
+    personsService
+      .create(newPerson)
+      .then(responsePerson => {
+        setPersons(persons.concat(responsePerson))
+        clearForm()
+    })
+
+  }
+
+  const deletePerson = (id) => {
+    if(window.confirm('Do you really want to delete this person?')){
+      personsService
+      .deleteItem(id)
+      .then(() => {
+        setPersons(persons.filter(person => person.id !== id))
+      })
+    }
   }
 
   const searchedPersons = showSearch
@@ -91,7 +101,10 @@ const App = () => {
       <h2>Numbers</h2>
       <div>
       {searchedPersons.map((person) => 
-        <Person key={person.name} person={person} />
+        <Person 
+          key={person.id} 
+          person={person}
+          handleDelete={() => deletePerson(person.id)} />
       )}
       </div>
     </div>

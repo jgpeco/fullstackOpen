@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import Form from './components/Form'
 import Person from './components/Person'
+import Notification from './components/Notifcation'
 import personsService from './services/persons'
 
 const Filter = ({search, handleSearch}) => <div>search person: <input type="text" value={search} onChange={handleSearch}/></div>
@@ -11,6 +12,7 @@ const App = () => {
   const [ newPhone, setNewPhone] = useState('')
   const [search, setSearch] = useState('')
   const [showSearch, setShowSearch] = useState(false)
+  const [notifcation, setNotification] = useState({message: '', type: 'neutral'})
  
   //fetching data from db.json
   useEffect(() => {
@@ -41,6 +43,11 @@ const App = () => {
     if(e.target.value) setShowSearch(true)
   }
 
+  const displayNotifcation = (message, type) => {
+    setNotification({message: message, type: type})
+    setTimeout(() => setNotification({...notifcation, message: ''}), 4000)
+  }
+
   const handleSubmit = (e) => {
     e.preventDefault()
     const newPerson = {
@@ -57,8 +64,12 @@ const App = () => {
           .update(updatedPerson.id, updatedPerson)
           .then(returnedPerson => {
             setPersons(persons.map(person => person.id !== returnedPerson.id ? person : returnedPerson))
+            displayNotifcation(`${newPerson.name} was updated!`, 'success')
             clearForm()
-          })            
+          })
+          .catch(error => {
+            
+          })           
       }
       return null
     }
@@ -68,7 +79,11 @@ const App = () => {
       .then(responsePerson => {
         setPersons(persons.concat(responsePerson))
         clearForm()
-    })
+        displayNotifcation(`${newPerson.name} was created!`, 'success')
+      })
+      .catch(error => {
+        displayNotifcation(error.message, 'error')
+      }) 
 
   }
 
@@ -78,7 +93,11 @@ const App = () => {
       .deleteItem(id)
       .then(() => {
         setPersons(persons.filter(person => person.id !== id))
+        displayNotifcation(`Person removed.`, 'success')
       })
+      .catch(error => {
+        displayNotifcation(error.message, 'error')
+      }) 
     }
   }
 
@@ -89,6 +108,7 @@ const App = () => {
   return (
     <div>
       <h1>Phonebook</h1>
+      <Notification content={notifcation} />
       <Filter search={search} handleSearch={handleSearch} />
       <h2>Add a New Person</h2>
       <Form 

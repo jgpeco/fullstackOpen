@@ -1,9 +1,11 @@
 const express = require('express')
 const app = express()
 const morgan = require('morgan')
+const cors = require('cors')
 
 //middlewares
 app.use(express.json())
+app.use(cors())
 
 morgan.token('data', (req) => {
     if(req.method === 'POST') return (JSON.stringify(req.body))

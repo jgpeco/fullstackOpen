@@ -1,8 +1,32 @@
 const express = require('express')
 const app = express()
+const morgan = require('morgan')
 
+//middlewares
 app.use(express.json())
 
+morgan.token('data', (req) => {
+    if(req.method === 'POST') return (JSON.stringify(req.body))
+    return 'no data sent in request'
+})
+
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms - :data'))
+
+const requestLogger = (request, response, next) => {
+    console.log('Method:', request.method);
+    console.log('Path:', request.path);
+    console.log('Body:', request.body);
+    console.log('------');
+    next()
+}
+
+const unknownEndpoint = (request, response) => {
+    response.status(404).send({ error: 'unknown endpoint' })
+  }
+
+app.use(requestLogger)
+
+//data
 let notes = [
     {
       id: 1,
@@ -23,6 +47,9 @@ let notes = [
       important: true
     }
   ]
+
+//routes
+
 app.get('/', (request, response) => {
     response.send('<h1>Hello World</h1>')
 })
@@ -73,11 +100,12 @@ app.post('/api/notes', (request, response) => {
         id: generatedId(),
     }
 
-    notes = notes.concact(note)
+    notes = notes.concat(note)
 
     response.json(note)
 })
 
+app.use(unknownEndpoint)
 
 const PORT = 3001
 app.listen(PORT, () => {

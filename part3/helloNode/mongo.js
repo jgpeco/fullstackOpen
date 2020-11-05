@@ -30,6 +30,7 @@ const Note = mongoose.model('Note', noteSchema)
 //     date: new Date(),
 //     important: true
 // })
+
 // note.save().then(result => {
 //     console.log('note saved')
 //     mongoose.connection.close()

@@ -68,7 +68,7 @@ const App = () => {
             clearForm()
           })
           .catch(error => {
-            
+            displayNotifcation(error.message, 'error')
           })           
       }
       return null

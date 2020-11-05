@@ -29,27 +29,6 @@ const requestLogger = (request, response, next) => {
 
 app.use(requestLogger)
 
-//data
-let notes = [
-    {
-      id: 1,
-      content: "HTML is easy",
-      date: "2019-05-30T17:30:31.098Z",
-      important: true
-    },
-    {
-      id: 2,
-      content: "Browser can execute only Javascript",
-      date: "2019-05-30T18:39:34.091Z",
-      important: false
-    },
-    {
-      id: 3,
-      content: "GET and POST are the most important methods of HTTP protocol",
-      date: "2019-05-30T19:20:14.298Z",
-      important: true
-    }
-  ]
 
 //routes
 app.get('/api/notes', (request, response) => {
@@ -76,12 +55,8 @@ app.delete('/api/notes/:id', (request, response, next) => {
     .catch(error => next(error))
 })
 
-app.post('/api/notes', (request, response) => {
+app.post('/api/notes', (request, response, next) => {
     const body = request.body
-
-    if(body.content === undefined) return response.status(400).json({
-        error: 'content missing'
-    })
 
     const note = new Note({
         content: body.content,
@@ -89,9 +64,11 @@ app.post('/api/notes', (request, response) => {
         date: new Date(),
     })
 
-    note.save().then(savedNote => {
-        response.json(savedNote)
-    })
+    note
+     .save()
+     .then(savedNote => savedNote.toJSON())
+     .then(savedAndFormattedNote => response.json(savedAndFormattedNote))
+     .catch(error => next(error))
 })
 
 app.put('/api/notes/:id', (request, response, next) => {
@@ -119,7 +96,10 @@ const errorHandler = (error, request, response, next) => {
 
     if (error.name === 'CastError'){
         return response.status(400).send({ error: 'malformatted id'})
+    } else if (error.name === 'ValidationError'){
+        return response.status(400).json({error: error.message})
     }
+
     next(error)
 }
 app.use(errorHandler)

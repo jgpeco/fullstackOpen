@@ -68,6 +68,7 @@ const App = () => {
             clearForm()
           })
           .catch(error => {
+            console.log(error)
             displayNotifcation(error.message, 'error')
           })           
       }
@@ -82,7 +83,7 @@ const App = () => {
         displayNotifcation(`${newPerson.name} was created!`, 'success')
       })
       .catch(error => {
-        displayNotifcation(error.message, 'error')
+        displayNotifcation(error.response.data.error, 'error')
       }) 
 
   }
@@ -96,7 +97,7 @@ const App = () => {
         displayNotifcation(`Person removed.`, 'success')
       })
       .catch(error => {
-        displayNotifcation(error.message, 'error')
+        displayNotifcation(error.response.data.error, 'error')
       }) 
     }
   }

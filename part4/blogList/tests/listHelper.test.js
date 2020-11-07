@@ -25,6 +25,27 @@ const listWithNoBlogs = []
             likes: 12,
             id: `5fa59a0e49b9df31c00c7d17`,
         },
+        {
+            title: `Male's Other Blog`,
+            author: `Male`,
+            url: `http://www.gmail.com`,
+            likes: 8,
+            id: `5fa6e2086c6f860fb4bf9d1`,
+        },
+        {
+            title: `Male's More Blogs`,
+            author: `Male`,
+            url: `http://www.gmail.com`,
+            likes: 5,
+            id: `5fa6e2176c6f860fb4bf9d12`
+        },
+        {
+            title: `Peco's Other Blog`,
+            author: `Peco`,
+            url: `http://www.gmail.com`,
+            likes: 6,
+            id: `5fa6e2266c6f860fb4bf9d13`
+          }
     ]
 
 
@@ -42,7 +63,7 @@ describe('total likes', () => {
     })
 
     test('of a bigger list is calculated right', () => {
-        expect(listHelper.totalLikes(listWithBlogs)).toBe(15)
+        expect(listHelper.totalLikes(listWithBlogs)).toBe(34)
     })
 })
 
@@ -57,5 +78,36 @@ describe('favorite blog', () => {
 
     test('when list of blog has more items, to be the most liked', () => {
         expect(listHelper.favoriteBlog(listWithBlogs)).toEqual(listWithBlogs[1])
+    })
+})
+
+describe('most blogs', () => {
+    test('of empty list is zero', () => {
+        expect(listHelper.mostBlogs(listWithNoBlogs)).toBe(0)
+    })
+
+    test('when the list of blogs has one blog author', () => {
+        const blogAuthor = listHelper.mostBlogs(listWithOneBlog)
+        expect(blogAuthor.author).toBe('Peco')
+    })
+
+    test('when the list of blogs has more than one blog author', () => {
+        const blogAuthors = listHelper.mostBlogs(listWithBlogs)
+        expect(blogAuthors.author).toBe('Male')
+        expect(blogAuthors.blogs).toBe(3)
+    })
+})
+
+describe('most likes', () => {
+    test('of empty list is zero', () => {
+        expect(listHelper.mostLikes(listWithNoBlogs)).toBe(0)
+    })
+
+    test('when there is just one blog post', () => {
+        expect(listHelper.mostLikes(listWithOneBlog)).toBe(3)
+    })
+
+    test('when there are several blog posts with different authors', () => {
+        console.log('hi')
     })
 })

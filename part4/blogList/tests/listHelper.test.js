@@ -104,10 +104,14 @@ describe('most likes', () => {
     })
 
     test('when there is just one blog post', () => {
-        expect(listHelper.mostLikes(listWithOneBlog)).toBe(3)
+        const blogCreator = listHelper.mostLikes(listWithOneBlog)
+        expect(blogCreator.author).toBe('Peco')
+        expect(blogCreator.likes).toBe(3)
     })
 
     test('when there are several blog posts with different authors', () => {
-        console.log('hi')
+        const blogCreator = listHelper.mostLikes(listWithBlogs)
+        expect(blogCreator.author).toBe('Male')
+        expect(blogCreator.likes).toBe(25)
     })
 })

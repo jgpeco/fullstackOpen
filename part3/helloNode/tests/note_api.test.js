@@ -18,7 +18,6 @@ beforeEach(async () => {
 
 
 test('notes are returned as json', async () => {
-    console.log('entering tests...')
     await api
         .get('/api/notes')
         .expect(200)

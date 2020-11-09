@@ -4,9 +4,9 @@
   "description": "hello world in node",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "cross-env NODE_ENV=production node index.js",
+    "dev": "cross-env NODE_ENV=development nodemon index.js",
+    "test": "cross-env NODE_ENV=test jest --verbose --runInBand",
     "build:ui": "rm -rf build && cd ../../part2/example-a && npm run build --prod && cp -r build ../../part3/helloNode",
     "deploy": "git push heroku master",
     "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && npm run deploy",
@@ -25,5 +25,8 @@
   "devDependencies": {
     "eslint": "^7.12.1",
     "nodemon": "^2.0.6"
+  },
+    "jest": {
+    "testEnvironment": "node"
   }
 }

@@ -1,10 +1,12 @@
 const mongoose = require('mongoose')
 const helper = require('./bloglist_testHelper')
+const bcrypt = require('bcrypt')
 const supertest = require('supertest')
 const app = require('../app')
 const api = supertest(app)
 
 const Blog = require('../models/blog')
+const User = require('../models/user')
 
 beforeEach(async () => {
     await Blog.deleteMany({})
@@ -30,7 +32,7 @@ describe('GET /api/blogs', () => {
     })
 
     test('the blog posts have a id property', async () => {
-        const response = await helper.blogsInDB()
+        const response = await helper.blogsInDb()
         const blogToCheck = response[0]
 
         expect(blogToCheck.id).toBeDefined()
@@ -52,7 +54,7 @@ describe('POST /api/posts', () => {
             .expect(201)
             .expect('Content-Type', /application\/json/)
 
-        const blogs = await helper.blogsInDB()
+        const blogs = await helper.blogsInDb()
         expect(blogs).toHaveLength(helper.initialBlogs.length + 1)
 
         const blogAuthors = blogs.map(blog => blog.author)
@@ -74,7 +76,7 @@ describe('POST /api/posts', () => {
         .expect(201)
         .expect('Content-Type', /application\/json/)
 
-        const blogsAfterPost = await helper.blogsInDB()
+        const blogsAfterPost = await helper.blogsInDb()
         expect(blogsAfterPost).toHaveLength(helper.initialBlogs.length + 1)
 
         const blogWithoutLikes = blogsAfterPost.find(blog => blog.author === newBlog.author)
@@ -94,21 +96,21 @@ describe('POST /api/posts', () => {
             .expect(400)
             .expect('Content-Type', /application\/json/)
 
-        const blogsAfterPost = await helper.blogsInDB()
+        const blogsAfterPost = await helper.blogsInDb()
         expect(blogsAfterPost).toHaveLength(helper.initialBlogs.length)
      })
 })
 
 describe('DELETE /api/blogs/:id', () => {
     test('delete resource when valid ID is passed', async () => {
-        const allBlogs = await helper.blogsInDB()
+        const allBlogs = await helper.blogsInb()
         const blogToRemove = allBlogs[0]
 
         await api
             .delete(`/api/blogs/${blogToRemove.id}`)
             .expect(204)
 
-        const blogsAfterRemoval = await helper.blogsInDB()
+        const blogsAfterRemoval = await helper.blogsInDb()
         expect(blogsAfterRemoval).toHaveLength(helper.initialBlogs.length - 1)
 
         const blogAuthors = blogsAfterRemoval.map(b => b.author)
@@ -118,7 +120,7 @@ describe('DELETE /api/blogs/:id', () => {
 
 describe('PUT /api/blogs/:id', () => {
     test('when the user pass valid data to update', async () => {
-        const allBlogs = await helper.blogsInDB()
+        const allBlogs = await helper.blogsInDb()
         const blogToUpdate = allBlogs[0]
 
         const newInfo = {
@@ -136,8 +138,90 @@ describe('PUT /api/blogs/:id', () => {
 
         expect(updatedBlog.body.likes).toBe(blogToUpdate.likes + 1)
 
-        const allBlogsAfterUpdate = await helper.blogsInDB()
+        const allBlogsAfterUpdate = await helper.blogsInDb()
         expect(allBlogsAfterUpdate).toHaveLength(helper.initialBlogs.length)
+    })
+})
+
+describe.only('User Management', () => {
+    beforeEach(async () => {
+        await User.deleteMany({})
+
+        const passwordHash = await bcrypt.hash('sekret', 10)
+        const defaultUser = new User({ username: 'root', passwordHash })
+        await defaultUser.save()
+    })
+    test('Create user with valid data. POST /api/users', async () => {
+        const allUsers = await helper.usersInDb()
+
+        const newUser = {
+            username: 'peco',
+            password: 'password'
+        }
+
+        const userRequest = await api
+            .post('/api/users')
+            .send(newUser)
+            .expect(200)
+            .expect('Content-Type', /application\/json/)
+        expect(userRequest.body.username).toMatch('peco')
+
+        const allUsersPostRequest = await helper.usersInDb()
+        expect(allUsersPostRequest).toHaveLength(allUsers.length + 1)
+
+        const allUsernamesInDb = allUsersPostRequest.map(u => u.username)
+        expect(allUsernamesInDb).toContain('peco')
+    })
+
+    test('With invalid password, do not create new user. POST /api/users', async () => {
+        const allUsers = await helper.usersInDb()
+
+        const invalidNewUser = {
+            name: 'Peco Testandus',
+            username: 'peco',
+            password: 'oi'
+        }
+
+        const errorUser = await api
+            .post('/api/users')
+            .send(invalidNewUser)
+            .expect(400)
+            .expect('Content-Type', /application\/json/)
+        expect(errorUser.body.error).toMatch('password is too short')
+
+        const usersinDbAfterRequest = await helper.usersInDb()
+        expect(usersinDbAfterRequest).toHaveLength(allUsers.length)
+    })
+
+    test('With invalid username, do not create a new user. POST /api/users', async () => {
+        const invalidNewUser = {
+            name: 'Peco Testandus',
+            password: 'senha'
+        }
+
+        const errorUser = await api
+            .post('/api/users')
+            .send(invalidNewUser)
+            .expect(400)
+        expect(errorUser.body.error).toMatch('`username` is required')
+    })
+
+    test('With a username that already exists, do not create a new user. POST /api/users', async () => {
+        const allUsersInDb = await helper.usersInDb()
+
+        const invalidNewUser = {
+            username: 'root',
+            password: 'secret'
+        }
+
+        const errorUser = await api
+            .post('/api/users')
+            .send(invalidNewUser)
+            .expect(400)
+        expect(errorUser.body.error).toMatch('expected `username` to be unique')
+
+        const allUsersInDbAfterRequest = await helper.usersInDb()
+        expect(allUsersInDbAfterRequest).toHaveLength(allUsersInDb.length)
     })
 })
 

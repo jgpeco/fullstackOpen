@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const supertest = require('supertest')
 const app = require('../app')
+const blog = require('../models/blog')
 const api = supertest(app)
 const Blog = require('../models/blog')
 const helper = require('./bloglist_testHelper')
@@ -9,10 +10,10 @@ const helper = require('./bloglist_testHelper')
 beforeEach(async () => {
     await Blog.deleteMany({})
 
-    let newBlog = new Blog(helper.initialBlogs[0])
-    await newBlog.save()
-    newBlog = new Blog(helper.initialBlogs[1])
-    await newBlog.save()
+    for(let blog of helper.initialBlogs){
+        let blogObj = new Blog(blog)
+        await blogObj.save()
+    }
 })
 
 describe('GET /api/blogs', () => {
@@ -98,6 +99,47 @@ describe('POST /api/posts', () => {
         const blogsAfterPost = await helper.blogsInDB()
         expect(blogsAfterPost).toHaveLength(helper.initialBlogs.length)
      })
+})
+
+describe('DELETE /api/blogs/:id', () => {
+    test('delete resource when valid ID is passed', async () => {
+        const allBlogs = await helper.blogsInDB()
+        const blogToRemove = allBlogs[0]
+
+        await api
+            .delete(`/api/blogs/${blogToRemove.id}`)
+            .expect(204)
+
+        const blogsAfterRemoval = await helper.blogsInDB()
+        expect(blogsAfterRemoval).toHaveLength(helper.initialBlogs.length - 1)
+
+        const blogAuthors = blogsAfterRemoval.map(b => b.author)
+        expect(blogAuthors).not.toContain('Peco')
+    })
+})
+
+describe('PUT /api/blogs/:id', () => {
+    test('when the user pass valid data to update', async () => {
+        const allBlogs = await helper.blogsInDB()
+        const blogToUpdate = allBlogs[0]
+
+        const newInfo = {
+            title: blogToUpdate.title,
+            author: blogToUpdate.author,
+            url: blogToUpdate.url,
+            likes: blogToUpdate.likes + 1
+        }
+
+        const updatedBlog = await api
+            .put(`/api/blogs/${blogToUpdate.id}`)
+            .send(newInfo)
+            .expect(200)
+
+        expect(updatedBlog.body.likes).toBe(blogToUpdate.likes + 1)
+
+        const allBlogsAfterUpdate = await helper.blogsInDB()
+        expect(allBlogsAfterUpdate).toHaveLength(helper.initialBlogs.length)
+    })
 })
 
 afterAll(() => {

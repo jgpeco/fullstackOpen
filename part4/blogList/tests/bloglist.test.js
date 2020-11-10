@@ -1,11 +1,10 @@
 const mongoose = require('mongoose')
+const helper = require('./bloglist_testHelper')
 const supertest = require('supertest')
 const app = require('../app')
-const blog = require('../models/blog')
 const api = supertest(app)
-const Blog = require('../models/blog')
-const helper = require('./bloglist_testHelper')
 
+const Blog = require('../models/blog')
 
 beforeEach(async () => {
     await Blog.deleteMany({})
@@ -45,7 +44,6 @@ describe('POST /api/posts', () => {
             author: `Tobias`,
             url: `http://www.facebook.com`,
             likes: 5,
-            id: `5fa596ccc40ae033681014e2`,
         }
 
         await api
@@ -134,6 +132,7 @@ describe('PUT /api/blogs/:id', () => {
             .put(`/api/blogs/${blogToUpdate.id}`)
             .send(newInfo)
             .expect(200)
+            .expect('Content-Type', /application\/json/)
 
         expect(updatedBlog.body.likes).toBe(blogToUpdate.likes + 1)
 

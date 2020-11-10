@@ -61,7 +61,6 @@ describe('viewing a specific note', () => {
 
     test('fails with statuscode 404 if note does not exist', async () => {
         const validNonexistingId = await helper.nonExistingId()
-        console.log(validNonexistingId)
 
         await api
             .get(`/api/notes${validNonexistingId}`)
@@ -79,14 +78,26 @@ describe('viewing a specific note', () => {
 })
 
 describe('addition of a new note', () => {
-    test('succeeds with valid data', async () => {
-        const newNote = {
-            content: 'async/await simplifies making async calls',
-            important: true,
+    let token = ''
+    const newNote = {
+        content: 'async/await simplifies making async calls',
+        important: true,
+    }
+
+    beforeEach(async () => {
+        const loginInfo = {
+            username: 'root',
+            password: 'sekret'
         }
 
+        const login = await api.post('/api/login').send(loginInfo)
+        token = login.body.token
+    })
+
+    test('succeeds with valid data and logged user', async () => {
         await api
             .post('/api/notes')
+            .set('Authorization', `Bearer ${token}`)
             .send(newNote)
             .expect(200)
             .expect('Content-Type', /application\/json/)
@@ -101,17 +112,28 @@ describe('addition of a new note', () => {
     })
 
     test('note without content is not added', async () => {
-        const newNote = {
+        const newNoteWithoutContent = {
             important: true
         }
 
         await api
             .post('/api/notes')
-            .send(newNote)
+            .set('Authorization', `Bearer ${token}`)
+            .send(newNoteWithoutContent)
             .expect(400)
 
         const notesAtEnd = await helper.notesInDb()
         expect(notesAtEnd).toHaveLength(helper.initialNotes.length)
+    })
+
+    test('sent note without logged user token is not authorized', async () => {
+        const result = await api
+            .post('/api/notes')
+            .send(newNote)
+            .expect(401)
+            .expect('Content-Type', /application\/json/)
+
+        expect(result.body.error).toMatch('invalid token')
     })
 })
 
@@ -207,10 +229,40 @@ describe('when there is initially one user in db', () => {
         expect(usersAtEnd).toHaveLength(usersAtStart.length)
 
     })
+
+    test('user login with valid credentials', async () => {
+        const allUsers = await helper.usersInDb()
+        const dbUser = allUsers[0]
+
+        const loginInfo = {
+            username: 'root',
+            password: 'sekret'
+        }
+        const loginUser = await api
+            .post('/api/login/')
+            .send(loginInfo)
+            .expect(200)
+
+        const loggedUser = loginUser.body
+        expect(loggedUser.token).toBeDefined()
+        expect(loggedUser.username).toEqual(dbUser.username)
+    })
+
+    test('with bad credentials, user login unhautorized with code 401', async (done) => {
+        const loginInfo = {
+            username: 'root',
+            password: 'secret'
+        }
+
+        const result = await api
+            .post('/api/login')
+            .send(loginInfo)
+            .expect(401)
+
+        expect(result.body.error).toMatch('invalid username or password')
+        done()
+    })
 })
-
-
-
 
 
 afterAll(() => {

@@ -148,6 +148,22 @@ describe('when there is initially one user in db', () => {
         await user.save()
     })
 
+    test('we can retrieve all users from the server', async() => {
+        const allUsersInDb = await helper.usersInDb()
+
+        const allUsersResponse = await api
+            .get('/api/users')
+            .expect(200)
+            .expect('Content-Type', /application\/json/)
+
+        const allUsers = allUsersResponse.body
+
+        expect(allUsers).toHaveLength(allUsersInDb.length)
+
+        const usernames = allUsers.map(u => u.username)
+        expect(usernames).toContain(allUsersInDb[0].username)
+    })
+
     test('creation succeeds with a fresh username', async () => {
         const usersAtStart = await helper.usersInDb()
 

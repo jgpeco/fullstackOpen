@@ -39,7 +39,7 @@ describe('GET /api/blogs', () => {
     })
 })
 
-describe('POST /api/posts', () => {
+describe('POST /api/blogs', () => {
     test('creates a new blog', async () => {
         const newBlog = {
             title: `Tobias's Blog`,
@@ -103,7 +103,7 @@ describe('POST /api/posts', () => {
 
 describe('DELETE /api/blogs/:id', () => {
     test('delete resource when valid ID is passed', async () => {
-        const allBlogs = await helper.blogsInb()
+        const allBlogs = await helper.blogsInDb()
         const blogToRemove = allBlogs[0]
 
         await api
@@ -143,7 +143,7 @@ describe('PUT /api/blogs/:id', () => {
     })
 })
 
-describe.only('User Management', () => {
+describe('User Management', () => {
     beforeEach(async () => {
         await User.deleteMany({})
 
@@ -151,79 +151,120 @@ describe.only('User Management', () => {
         const defaultUser = new User({ username: 'root', passwordHash })
         await defaultUser.save()
     })
-    test('Create user with valid data. POST /api/users', async () => {
-        const allUsers = await helper.usersInDb()
+    describe('User Creation', () => {
+        test('Create user with valid data. POST /api/users', async () => {
+            const allUsers = await helper.usersInDb()
 
-        const newUser = {
-            username: 'peco',
-            password: 'password'
-        }
+            const newUser = {
+                username: 'peco',
+                password: 'password'
+            }
 
-        const userRequest = await api
-            .post('/api/users')
-            .send(newUser)
-            .expect(200)
-            .expect('Content-Type', /application\/json/)
-        expect(userRequest.body.username).toMatch('peco')
+            const userRequest = await api
+                .post('/api/users')
+                .send(newUser)
+                .expect(200)
+                .expect('Content-Type', /application\/json/)
+            expect(userRequest.body.username).toMatch('peco')
 
-        const allUsersPostRequest = await helper.usersInDb()
-        expect(allUsersPostRequest).toHaveLength(allUsers.length + 1)
+            const allUsersPostRequest = await helper.usersInDb()
+            expect(allUsersPostRequest).toHaveLength(allUsers.length + 1)
 
-        const allUsernamesInDb = allUsersPostRequest.map(u => u.username)
-        expect(allUsernamesInDb).toContain('peco')
+            const allUsernamesInDb = allUsersPostRequest.map(u => u.username)
+            expect(allUsernamesInDb).toContain('peco')
+        })
+
+        test('With invalid password, do not create new user. POST /api/users', async () => {
+            const allUsers = await helper.usersInDb()
+
+            const invalidNewUser = {
+                name: 'Peco Testandus',
+                username: 'peco',
+                password: 'oi'
+            }
+
+            const errorUser = await api
+                .post('/api/users')
+                .send(invalidNewUser)
+                .expect(400)
+                .expect('Content-Type', /application\/json/)
+            expect(errorUser.body.error).toMatch('password is too short')
+
+            const usersinDbAfterRequest = await helper.usersInDb()
+            expect(usersinDbAfterRequest).toHaveLength(allUsers.length)
+        })
+
+        test('With invalid username, do not create a new user. POST /api/users', async () => {
+            const invalidNewUser = {
+                name: 'Peco Testandus',
+                password: 'senha'
+            }
+
+            const errorUser = await api
+                .post('/api/users')
+                .send(invalidNewUser)
+                .expect(400)
+            expect(errorUser.body.error).toMatch('`username` is required')
+        })
+
+        test('With a username that already exists, do not create a new user. POST /api/users', async () => {
+            const allUsersInDb = await helper.usersInDb()
+
+            const invalidNewUser = {
+                username: 'root',
+                password: 'secret'
+            }
+
+            const errorUser = await api
+                .post('/api/users')
+                .send(invalidNewUser)
+                .expect(400)
+            expect(errorUser.body.error).toMatch('expected `username` to be unique')
+
+            const allUsersInDbAfterRequest = await helper.usersInDb()
+            expect(allUsersInDbAfterRequest).toHaveLength(allUsersInDb.length)
+        })
     })
 
-    test('With invalid password, do not create new user. POST /api/users', async () => {
-        const allUsers = await helper.usersInDb()
 
-        const invalidNewUser = {
-            name: 'Peco Testandus',
-            username: 'peco',
-            password: 'oi'
-        }
+    describe('User Authentication', () => {
+        test('User with valid credentials should log in and receive a token', async () => {
+            const userToLogin = {
+                username: 'root',
+                password: 'sekret'
+            }
 
-        const errorUser = await api
-            .post('/api/users')
-            .send(invalidNewUser)
-            .expect(400)
-            .expect('Content-Type', /application\/json/)
-        expect(errorUser.body.error).toMatch('password is too short')
+            const loggedUser = await api
+                .post('/api/login')
+                .send(userToLogin)
+                .expect(200)
+                .expect('Content-Type', /application\/json/)
+            expect(loggedUser.body.token).toBeDefined()
 
-        const usersinDbAfterRequest = await helper.usersInDb()
-        expect(usersinDbAfterRequest).toHaveLength(allUsers.length)
+            const allUsersInDb = await helper.usersInDb()
+            const user = allUsersInDb[0]
+            expect(user.username).toEqual(loggedUser.body.username)
+        })
+
+        test('User with invalid credentials should not log in', async () => {
+            const invalidUser = {
+                username: 'root',
+                password: 'secret'
+            }
+
+            const loggedUser = await api
+                .post('/api/login')
+                .send(invalidUser)
+                .expect(401)
+                .expect('Content-Type', /application\/json/)
+            expect(loggedUser.body.error).toMatch('invalid password')
+
+        })
     })
 
-    test('With invalid username, do not create a new user. POST /api/users', async () => {
-        const invalidNewUser = {
-            name: 'Peco Testandus',
-            password: 'senha'
-        }
-
-        const errorUser = await api
-            .post('/api/users')
-            .send(invalidNewUser)
-            .expect(400)
-        expect(errorUser.body.error).toMatch('`username` is required')
-    })
-
-    test('With a username that already exists, do not create a new user. POST /api/users', async () => {
-        const allUsersInDb = await helper.usersInDb()
-
-        const invalidNewUser = {
-            username: 'root',
-            password: 'secret'
-        }
-
-        const errorUser = await api
-            .post('/api/users')
-            .send(invalidNewUser)
-            .expect(400)
-        expect(errorUser.body.error).toMatch('expected `username` to be unique')
-
-        const allUsersInDbAfterRequest = await helper.usersInDb()
-        expect(allUsersInDbAfterRequest).toHaveLength(allUsersInDb.length)
-    })
 })
+
+
 
 afterAll(() => {
     mongoose.connection.close()

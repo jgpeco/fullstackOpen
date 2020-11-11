@@ -2,6 +2,11 @@ const bcrypt = require('bcrypt')
 const User = require('../models/user')
 const userRouter = require('express').Router()
 
+userRouter.get('/', async (request, response) => {
+    const result = await User.find({})
+    response.json(result)
+})
+
 userRouter.post('/', async (request, response) => {
     const body = request.body
     if(body.password.length < 3) return response.status(400).json({ error: 'password is too short' })

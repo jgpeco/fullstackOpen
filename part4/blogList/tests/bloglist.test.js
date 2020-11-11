@@ -15,6 +15,12 @@ beforeEach(async () => {
         let blogObj = new Blog(blog)
         await blogObj.save()
     }
+
+    await User.deleteMany({})
+
+    const passwordHash = await bcrypt.hash('sekret', 10)
+    const defaultUser = new User({ username: 'root', passwordHash })
+    await defaultUser.save()
 })
 
 describe('GET /api/blogs', () => {
@@ -39,8 +45,21 @@ describe('GET /api/blogs', () => {
     })
 })
 
-describe('POST /api/blogs', () => {
-    test('creates a new blog', async () => {
+describe.only('POST /api/blogs', () => {
+    let token = ''
+    const defaultUser = {
+        username: 'root',
+        password: 'sekret'
+    }
+
+    beforeEach(async () => {
+        const loggedUser = await api
+        .post('/api/login')
+        .send(defaultUser)
+        token = loggedUser.body.token
+    })
+
+    test('creates a new blog if user has token', async () => {
         const newBlog = {
             title: `Tobias's Blog`,
             author: `Tobias`,
@@ -50,6 +69,7 @@ describe('POST /api/blogs', () => {
 
         await api
             .post('/api/blogs')
+            .set('Authorization', `bearer ${token}`)
             .send(newBlog)
             .expect(201)
             .expect('Content-Type', /application\/json/)
@@ -63,7 +83,7 @@ describe('POST /api/blogs', () => {
         )
     })
 
-    test('if the property likes was not sent, it will be 0', async () => {
+    test('with a user with token, if the property likes was not sent, it will be 0', async () => {
         const newBlog = {
             title: `Tobias's Blog`,
             author: `Tobias`,
@@ -72,6 +92,7 @@ describe('POST /api/blogs', () => {
 
         await api
         .post('/api/blogs')
+        .set('Authorization', `bearer ${token}`)
         .send(newBlog)
         .expect(201)
         .expect('Content-Type', /application\/json/)
@@ -92,12 +113,31 @@ describe('POST /api/blogs', () => {
 
         await api
             .post('/api/blogs')
+            .set('Authorization', `bearer ${token}`)
             .send(newBlog)
             .expect(400)
             .expect('Content-Type', /application\/json/)
 
         const blogsAfterPost = await helper.blogsInDb()
         expect(blogsAfterPost).toHaveLength(helper.initialBlogs.length)
+     })
+
+     test('a user with an invalid or missing token cannot add a blog', async () => {
+         token = ''
+         const newBlog = {
+            title: `Tobias's Blog`,
+            author: `Tobias`,
+            url: `http://www.facebook.com`,
+            likes: 5,
+        }
+
+        const invalidRequest = await api
+            .post('/api/blogs')
+            .set('Authorization', `Bearer ${token}`)
+            .send(newBlog)
+            .expect(401)
+            .expect('Content-Type', /application\/json/)
+        expect(invalidRequest.body.error).toMatch('invalid token')
      })
 })
 
@@ -144,13 +184,6 @@ describe('PUT /api/blogs/:id', () => {
 })
 
 describe('User Management', () => {
-    beforeEach(async () => {
-        await User.deleteMany({})
-
-        const passwordHash = await bcrypt.hash('sekret', 10)
-        const defaultUser = new User({ username: 'root', passwordHash })
-        await defaultUser.save()
-    })
     describe('User Creation', () => {
         test('Create user with valid data. POST /api/users', async () => {
             const allUsers = await helper.usersInDb()

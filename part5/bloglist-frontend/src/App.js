@@ -3,6 +3,16 @@ import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
 
+const Notification = ({message, messageType}) => {
+    if(!message) return null
+
+    return (
+      <div className={`notification-${messageType}`}>
+        {message}
+      </div>
+    )
+}
+
 const App = () => {
   //blog content
   const [blogs, setBlogs] = useState([])
@@ -14,8 +24,9 @@ const App = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
-  //errors
-  const [errorMessage, setErrorMessage] = useState('')
+  //notifications
+  const [message, setMessage] = useState('')
+  const [messageType, setMessageType] = useState('')
   
   useEffect(async () => {
     const blogs = await blogService.getAll()
@@ -41,6 +52,15 @@ const App = () => {
     setBlogUrl('')
   }
 
+  const showMessage = (messageText, type) => {
+      setMessage(messageText)
+      setMessageType(type)
+      setTimeout(() => {
+        setMessage('')
+        setMessageType('')
+      }, 4000)
+  }
+
   const handleLogin = async (e) => {
     e.preventDefault()
     try {
@@ -50,12 +70,8 @@ const App = () => {
       setUser(userResponse)
       clearLoginForm()
     } catch(exception) {
-        setErrorMessage('Wrong Credentials')
+        showMessage('Wrong Credentials', 'error')
         clearLoginForm()
-        console.log(errorMessage)
-        setTimeout(() => {
-          setErrorMessage('')
-        }, 4000)
     }
   }
 
@@ -63,6 +79,7 @@ const App = () => {
     window.localStorage.removeItem('loggedBloglistUser')
     setUser(null)
     blogService.setToken(null)
+    showMessage('User logged out', 'success')
     clearLoginForm()
     clearBlogForm()
   }
@@ -76,19 +93,18 @@ const App = () => {
         url: blogUrl
       })
       setBlogs(blogs.concat(blog))
+      showMessage(`New Blog ${blogTitle} added`, 'success')
       clearBlogForm()
     } catch(exception) {
-      setErrorMessage('Invalid or Missing Blog Information')
+      showMessage('Invalid os missing information on form', 'error')
       clearBlogForm()
-      setTimeout(() => {
-        setErrorMessage('')
-      }, 4000)
     }
   }
 
   if(user === null){
     return (
       <form onSubmit={handleLogin}>
+        <Notification message={message} messageType={messageType} />
         <div>
           Username: 
           <input 
@@ -115,6 +131,7 @@ const App = () => {
   return (
     <div>
       <h2>blogs</h2>
+      <Notification message={message} messageType={messageType} />
       <p>
         {user.name} is logged <button onClick={handleLogout}>Logout</button>
       </p>

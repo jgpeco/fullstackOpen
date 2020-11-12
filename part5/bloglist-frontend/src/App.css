@@ -1,17 +1,17 @@
 .notification-success {
   padding: 1rem;
-  background-color: lightgray;
-  border: 1px solid green;
+  background-color: green;
+  border: 1px solid lightgray;
   font-weight: bold;
   font-size: 2rem;
-  color: green;
+  color: white;
 }
 
 .notification-error {
   padding: 1rem;
-  background-color: lightgray;
-  border: 1px solid red;
+  background-color: #fe1942;
+  border: 1px solid lightgray;
   font-weight: bold;
   font-size: 2rem;
-  color: red;
+  color: white;
 }

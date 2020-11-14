@@ -22,8 +22,9 @@ const App = () => {
   const [messageType, setMessageType] = useState('')
   
   useEffect(async () => {
-    const blogs = await blogService.getAll()
-    setBlogs(blogs)
+    const blogsFromServer = await blogService.getAll()
+    //blogs will be listed by the number of likes
+    setBlogs(blogsFromServer.sort((blogA, blogB) => blogB.likes - blogA.likes))
   }, [])
 
   useEffect(() => {
@@ -33,6 +34,8 @@ const App = () => {
       blogService.setToken(loggedUser.token)
     }
   }, [])
+
+  console.log(blogs)
 
   const clearLoginForm = () => {
     setUsername('')
@@ -77,7 +80,17 @@ const App = () => {
       setBlogs(blogs.concat(blog))
       showMessage(`New Blog ${blog.title} added`, 'success')
     } catch(exception) {
-      showMessage('Invalid os missing information on form', 'error')
+      showMessage('Invalid or missing information on form', 'error')
+    }
+  }
+
+  const updateBlog = async (newInfoForBlog) => {
+    try {
+      const updatedBlog = await blogService.update(newInfoForBlog)
+      setBlogs(blogs.map(blog => blog.id === updatedBlog.id ? updatedBlog : blog))
+      showMessage(`Blog ${updatedBlog.title} updated`, 'success')
+    } catch(exception) {
+      showMessage('Invalid action', 'error')
     }
   }
 
@@ -120,7 +133,7 @@ const App = () => {
         <BlogForm createBlog={createBlog} />
       </Togglable>
       {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} />
+        <Blog key={blog.id} blog={blog} updateBlog={updateBlog} />
       )}
     </div>
   )

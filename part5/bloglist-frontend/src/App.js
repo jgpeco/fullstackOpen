@@ -35,13 +35,10 @@ const App = () => {
     }
   }, [])
 
-  console.log(blogs)
-
   const clearLoginForm = () => {
     setUsername('')
     setPassword('')
   }
-
 
   const showMessage = (messageText, type) => {
       setMessage(messageText)
@@ -94,6 +91,16 @@ const App = () => {
     }
   }
 
+  const deleteBlog = async (blogToDelete) => {
+    try {
+      await blogService.deleteItem(blogToDelete)
+      setBlogs(blogs.filter(blog => blog.id !== blogToDelete.id))
+      showMessage('Blog Removed', 'success')
+    } catch(exception) {
+      showMessage(`You don't have authorization for this action`, 'error')
+    }
+  }
+
   if(user === null){
     return (
       <form onSubmit={handleLogin}>
@@ -121,6 +128,8 @@ const App = () => {
     )
   }
 
+  const loggedUserToBlog = user ? user : false
+
   return (
     <div>
       <h2>blogs</h2>
@@ -133,7 +142,7 @@ const App = () => {
         <BlogForm createBlog={createBlog} />
       </Togglable>
       {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} updateBlog={updateBlog} />
+        <Blog key={blog.id} blog={blog} updateBlog={updateBlog} deleteBlog={deleteBlog} loggedUser={loggedUserToBlog} />
       )}
     </div>
   )

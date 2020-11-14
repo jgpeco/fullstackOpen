@@ -1,7 +1,15 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
-const Blog = ({ blog, updateBlog }) => {
+const Blog = ({ blog, updateBlog, deleteBlog, loggedUser }) => {
   const [viewDetails, setViewDetails] = useState(false)
+  const [isOwner, setIsOwner] = useState(false)
+
+
+  useEffect(() => {
+    if(loggedUser.username && loggedUser.username === blog.user.username) {
+      setIsOwner(true)
+    }
+  }, [])
   
   const blogStyle = {
     marginBottom: '0.5rem',
@@ -24,6 +32,16 @@ const Blog = ({ blog, updateBlog }) => {
     await updateBlog(blogWithUpdatedLike)
   }
 
+  const handleRemove = async () => {
+    if(window.confirm('Are you sure you want to delete this blog? This action is irreversible')){
+      const blogToDelete = {
+        id: blog.id,
+        user: blog.user.id,
+      }
+      await deleteBlog(blogToDelete)
+    }
+  }
+
   return (
     <div style={blogStyle}>
       <div>
@@ -35,6 +53,10 @@ const Blog = ({ blog, updateBlog }) => {
         {blog.user
           ? <p>Likes: {blog.likes} <button onClick={handleLike}>like</button></p>
           : null
+        }
+        {
+          isOwner &&
+          <p><button onClick={handleRemove}>Remove</button></p>
         }
       </div>
     </div>

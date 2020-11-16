@@ -44,11 +44,11 @@ const Blog = ({ blog, updateBlog, deleteBlog, loggedUser }) => {
   }
 
   return (
-    <div style={blogStyle}>
-      <div>
+    <div style={blogStyle} className='blogItem'>
+      <div className='blogItem-initialInfo'>
         {blog.title} <button onClick={toggleView}>View Details</button>
       </div>
-      <div style={showDetails}>
+      <div style={showDetails} className='blogItem-detailsInfo'>
         <p>Author: {blog.author}</p>
         <p>URL: {blog.url}</p>
         {blog.user

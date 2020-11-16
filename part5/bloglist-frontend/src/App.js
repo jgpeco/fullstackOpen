@@ -8,8 +8,6 @@ import Togglable from './components/Togglable'
 import blogService from './services/blogs'
 import loginService from './services/login'
 
-
-
 const App = () => {
   //blog content
   const [blogs, setBlogs] = useState([])
@@ -52,7 +50,7 @@ const App = () => {
   const handleLogin = async (e) => {
     e.preventDefault()
     try {
-      const userResponse = await loginService.login({username, password})
+      const userResponse = await loginService.login({ username, password })
       window.localStorage.setItem('loggedBloglistUser', JSON.stringify(userResponse))
       blogService.setToken(userResponse.token)
       setUser(userResponse)

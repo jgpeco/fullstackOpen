@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Profiler } from 'react'
+import React, { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 
 const Blog = ({ blog, updateBlog, deleteBlog, loggedUser }) => {
@@ -19,7 +19,7 @@ const Blog = ({ blog, updateBlog, deleteBlog, loggedUser }) => {
   }
 
   const toggleView = () => setViewDetails(!viewDetails)
-  const showDetails = {display: viewDetails ? '' : 'none'}
+  const showDetails = { display: viewDetails ? '' : 'none' }
 
   const handleLike = async () => {
     const blogWithUpdatedLike = {

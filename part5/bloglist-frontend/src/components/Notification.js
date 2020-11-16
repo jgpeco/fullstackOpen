@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-const Notification = ({message, messageType}) => {
+const Notification = ({ message, messageType }) => {
     if(!message) return null
 
     return (

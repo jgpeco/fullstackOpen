@@ -15,15 +15,15 @@ const getAll = () => {
 
 const create = async newObj => {
     const config = {
-        headers: {Authorization: token},
+        headers: { Authorization: token },
     }
 
     const response = await axios.post(baseUrl, newObj, config)
     return response.data
 }
 
-const update = (id, newObj) => {
-    const request = axios.put(`${baseUrl}/${id}`, newObj)
+const update = (id, newObject) => {
+    const request = axios.put(`${baseUrl}/${id}`, newObject)
     return request.then(response => response.data)
 }
 

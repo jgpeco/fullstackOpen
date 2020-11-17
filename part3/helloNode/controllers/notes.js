@@ -58,16 +58,19 @@ notesRouter.post('/', async (request, response) => {
 
 })
 
-notesRouter.put('/:id', async (request, response) => {
+notesRouter.put('/:id', (request, response, next) => {
     const body = request.body
 
     const note = {
-        content: body.content,
-        important: body.important
+      content: body.content,
+      important: body.important,
     }
 
-    const updatedNote = Note.findByIdAndUpdate(request.params.id, note, { new: true })
-    response.json(updatedNote)
-})
+    Note.findByIdAndUpdate(request.params.id, note, { new: true })
+      .then(updatedNote => {
+        response.json(updatedNote.toJSON())
+      })
+      .catch(error => next(error))
+  })
 
 module.exports = notesRouter

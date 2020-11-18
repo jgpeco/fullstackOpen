@@ -20,9 +20,9 @@ const App = () => {
   const [messageType, setMessageType] = useState('')
   
   useEffect(async () => {
-    const blogsFromServer = await blogService.getAll()
-    //blogs will be listed by the number of likes
-    setBlogs(blogsFromServer.sort((blogA, blogB) => blogB.likes - blogA.likes))
+      const blogsFromServer = await blogService.getAll()
+      //blogs will be listed by the number of likes
+      setBlogs(blogsFromServer.sort((blogA, blogB) => blogB.likes - blogA.likes))
   }, [])
 
   useEffect(() => {

@@ -5,9 +5,8 @@ const Blog = ({ blog, updateBlog, deleteBlog, loggedUser }) => {
   const [viewDetails, setViewDetails] = useState(false)
   const [isOwner, setIsOwner] = useState(false)
 
-
   useEffect(() => {
-    if(loggedUser.username && loggedUser.username === blog.user.username) {
+    if(loggedUser.username && blog.user.username && loggedUser.username === blog.user.username) {
       setIsOwner(true)
     }
   }, [])

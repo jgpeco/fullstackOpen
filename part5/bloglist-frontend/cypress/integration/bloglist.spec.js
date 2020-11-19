@@ -103,7 +103,7 @@ describe('Blog app', function() {
             cy.get('html').should('not.contain', 'test title')
         })
 
-        it.only(`A user that doesn't created the blog should not be able to delete it`, function(){
+        it(`A user that doesn't created the blog should not be able to delete it`, function(){
             cy.createBlog(dummyBlog)
             cy.contains('Logout').click()
 
@@ -122,6 +122,27 @@ describe('Blog app', function() {
             
             cy.get('@blogDiv').should('not.contain', 'Remove')
         })
-    })
+
+        it.only('Should sort blogs based on likes', function(){
+            cy.createBlog(dummyBlog)
+            cy.createBlog({
+                title: 'blog with more likes',
+                author: 'test author',
+                url: 'test url',
+                likes: 4,
+            })
+            cy.createBlog({
+                title: 'blog with medium likes',
+                author: 'test author',
+                url: 'test url',
+                likes: 2,
+            })
+
+            cy.get('.blogItem').should('have.length', 3)
+            cy.get('.blogItem').first().should('contain', 'blog with more likes')
+            cy.get('.blogItem').last().should('contain', 'test title')
+
+        })
+    })     
 })
 

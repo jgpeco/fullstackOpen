@@ -26,7 +26,6 @@ describe('Blog app', function() {
 
             cy.contains('test is logged')
         })
-    })
 
         it('fails with incorrect credentials', function() {
             cy.get('#input-username').type('root')
@@ -40,4 +39,27 @@ describe('Blog app', function() {
             
             cy.get('html').should('not.contain', 'test is logged')
         })
+    })
+
+    describe.only('When logged in', function(){
+        beforeEach(function() {
+            cy.login({ username: 'root', password: 'secret' })
+        })
+
+        it('A blog can be created', function(){
+            cy.contains('Create New Blog').click()
+            cy.get('#input-title').type('test title')
+            cy.get('#input-author').type('test author')
+            cy.get('#input-url').type('test url')
+            cy.get('.blog-form').submit()
+
+            cy.get('.notification-success')
+              .should('have.css', 'color', 'rgb(255, 255, 255)')
+              .and('have.css', 'background-color', 'rgb(0, 128, 0)')
+              .and('contain', 'New Blog')
+            
+            cy.contains('test title')
+        })
+    })
 })
+

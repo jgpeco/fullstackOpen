@@ -101,7 +101,7 @@ const App = () => {
 
   if(user === null){
     return (
-      <form onSubmit={handleLogin}>
+      <form onSubmit={handleLogin} className='loginForm'>
         <Notification message={message} messageType={messageType} />
         <div>
           Username: 
@@ -109,6 +109,7 @@ const App = () => {
             type="text"
             value={username}
             name='username'
+            id='input-username'
             onChange={(e) => setUsername(e.target.value)}
             />
         </div>
@@ -118,6 +119,7 @@ const App = () => {
             type="text"
             value={password}
             name='password'
+            id='input-password'
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>

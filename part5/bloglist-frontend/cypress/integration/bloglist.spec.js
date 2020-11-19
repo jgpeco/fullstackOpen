@@ -86,6 +86,42 @@ describe('Blog app', function() {
             
             cy.get('.notification-success').contains('updated')
         })
+
+        it('The owner of the blog can delete it', function(){
+            cy.createBlog(dummyBlog)
+            cy.contains('test title').parent().as('blogDiv')
+
+            cy.get('@blogDiv')
+              .contains('View Details')
+              .click()
+            
+            cy.get('@blogDiv')
+              .contains('Remove')
+              .click()
+            
+            cy.get('.notification-success').contains('Blog Removed')
+            cy.get('html').should('not.contain', 'test title')
+        })
+
+        it.only(`A user that doesn't created the blog should not be able to delete it`, function(){
+            cy.createBlog(dummyBlog)
+            cy.contains('Logout').click()
+
+            const anotherUser = {
+                name: 'another user',
+                username: 'other',
+                password: 'password'
+            }
+            cy.request('POST', 'http://localhost:3003/api/users', anotherUser)
+            cy.login({ username: 'other', password: 'password' })
+
+            cy.contains('test title').parent().as('blogDiv')
+            cy.get('@blogDiv')
+              .contains('View Details')
+              .click()
+            
+            cy.get('@blogDiv').should('not.contain', 'Remove')
+        })
     })
 })
 

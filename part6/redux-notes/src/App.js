@@ -1,0 +1,36 @@
+import { createStore } from 'redux'
+import noteReducer from '../reducers/noteReducer'
+
+const store = createStore(noteReducer)
+
+store.dispatch({
+  type: 'NEW_NOTE',
+  data: {
+    content: 'state changes are mad with actions',
+    important: false,
+    id: 2,
+  }
+})
+
+store.dispatch({
+  type: 'TOGGLE_IMPORTANCE',
+  data: {
+    id: 2,
+  }
+})
+
+const App = () => {
+  return (
+    <div>
+      <ul>
+        {store.getState().map(note => 
+          <li key={note.id}>
+            {note.content} <strong>{note.important ? 'important' : ''}</strong>
+          </li>
+        )}
+      </ul>
+    </div>
+  )
+}
+
+export default App;

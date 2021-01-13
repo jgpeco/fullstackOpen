@@ -47,10 +47,6 @@ const reducer = (state = initialState, action) => {
                 return {...anecdoteToVote, votes: anecdoteToVote.votes + 1}
               }
               return a
-          }).sort((a, b) => {
-            if(a.votes < b.votes) return 1
-            if(a.votes > b.votes) return -1
-            return 0
           })
 
     case 'CREATE-ANECDOTE':

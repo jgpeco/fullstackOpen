@@ -26,12 +26,17 @@ const reducer = (state = initialState, action) => {
   switch(action.type) {
     case 'VOTE':
       const anecdoteToVote = action.data
-      return state.map(a => {
-        if(a.id === anecdoteToVote.id){
-          return {...anecdoteToVote, votes: anecdoteToVote.votes + 1}
-        }
-        return a
-      })
+      return state
+            .map(a => {
+              if(a.id === anecdoteToVote.id){
+                return {...anecdoteToVote, votes: anecdoteToVote.votes + 1}
+              }
+              return a
+          }).sort((a, b) => {
+            if(a.votes < b.votes) return 1
+            if(a.votes > b.votes) return -1
+            return 0
+          })
     case 'CREATE-ANECDOTE':
       const newAnecdote = asObject(action.data)
       return [...state, newAnecdote]

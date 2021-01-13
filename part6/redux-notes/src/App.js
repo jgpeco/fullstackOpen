@@ -1,12 +1,12 @@
 import { createStore } from 'redux'
-import noteReducer from '../reducers/noteReducer'
+import noteReducer from './reducers/noteReducer'
 
 const store = createStore(noteReducer)
 
 store.dispatch({
   type: 'NEW_NOTE',
   data: {
-    content: 'state changes are mad with actions',
+    content: 'state changes are made with actions',
     important: false,
     id: 2,
   }

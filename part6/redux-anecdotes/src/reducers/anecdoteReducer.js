@@ -32,6 +32,9 @@ const reducer = (state = initialState, action) => {
         }
         return a
       })
+    case 'CREATE-ANECDOTE':
+      const newAnecdote = asObject(action.data)
+      return [...state, newAnecdote]
     default: return state
   }
 }

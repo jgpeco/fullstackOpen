@@ -14,10 +14,12 @@ const initialState = {
   filter: 'IMPORTANT'
 }
 
-const noteReducer = (state = initialState.notes, action) => {
+const noteReducer = (state = [], action) => {
     switch(action.type) {
         case 'NEW_NOTE':
             return [...state, action.data]
+        case 'INIT_NOTES':
+            return action.data
         case 'TOGGLE_IMPORTANCE':
             const id = action.data.id
             const noteToChange = state.find(n => n.id === id)
@@ -49,6 +51,13 @@ export const toggleImportanceOf = (id) => {
   return {
     type: 'TOGGLE_IMPORTANCE',
     data: { id }
+  }
+}
+
+export const initializeNotes = (notes) => {
+  return {
+    type: 'INIT_NOTES',
+    data: notes,
   }
 }
 

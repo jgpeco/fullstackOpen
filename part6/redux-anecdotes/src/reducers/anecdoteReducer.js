@@ -1,8 +1,13 @@
+import fetchHelper from '../services/anecdotes'
+
 //action creators
-export const initializeAnecdotes = (anecdotes) => {
-  return {
-    type: 'INIT_ANECDOTES',
-    data: anecdotes,
+export const initializeAnecdotes = () => {
+  return async dispatch => {
+    const initialAnecdotes = await fetchHelper.getAll()
+    dispatch({
+      type: 'INIT-ANECDOTES',
+      data: initialAnecdotes
+    })
   }
 }
 
@@ -35,7 +40,7 @@ const anecdoteReducer = (state = [], action) => {
               return a
           })
     
-    case 'INIT_ANECDOTES':
+    case 'INIT-ANECDOTES':
       return action.data
     
     case 'CREATE-ANECDOTE':

@@ -1,19 +1,3 @@
-const initialState = {
-  notes: [
-    {
-      content: 'reducer defines how redux store works',
-      important: true,
-      id: 1,
-    },
-    {
-      content: 'state of store can contain any data',
-      important: true,
-      id: 2,
-    }
-  ],
-  filter: 'IMPORTANT'
-}
-
 const noteReducer = (state = [], action) => {
     switch(action.type) {
         case 'NEW_NOTE':
@@ -33,17 +17,13 @@ const noteReducer = (state = [], action) => {
     }
 }
 
-const generateId = () => Number((Math.random() * 1000000).toFixed(1))
+// const generateId = () => Number((Math.random() * 1000000).toFixed(1))
 
-export const createNote = (content) => {
-  console.log(content)
+export const createNote = (data) => {
+  console.log(data)
   return {
     type: 'NEW_NOTE',
-    data: {
-      content,
-      important: false,
-      id: generateId()
-    }
+    data
   }
 }
 

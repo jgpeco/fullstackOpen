@@ -3,13 +3,16 @@ import { createAnecdote } from '../reducers/anecdoteReducer'
 import { showNotification, hideNotification } from '../reducers/notificationReducer'
 import { useDispatch } from 'react-redux'
 
+import fetchHelper from '../services/anecdotes'
+
 const AnecdoteForm = () => {
     const dispatch = useDispatch()
 
-    const createNewAnecdote = (e) => {
+    const createNewAnecdote = async (e) => {
         e.preventDefault()
-        const newAnecdote = e.target.anecdote.value
+        const anecdoteContent = e.target.anecdote.value
         e.target.anecdote.value = ''
+        const newAnecdote = await fetchHelper.createNew(anecdoteContent)
         dispatch(createAnecdote(newAnecdote))
         dispatch(showNotification('New Anecdote created succesfully!'))
 

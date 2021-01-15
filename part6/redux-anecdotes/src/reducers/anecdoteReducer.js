@@ -11,10 +11,13 @@ export const initializeAnecdotes = () => {
   }
 }
 
-export const createAnecdote = (anecdote) => {
-  return {
-    type: 'CREATE-ANECDOTE',
-    data: anecdote,
+export const createAnecdote = (anecdoteContent) => {
+  return async dispatch => {
+    const newAnecdote = await fetchHelper.createNew(anecdoteContent)
+    dispatch({
+      type: 'CREATE-ANECDOTE',
+      data: newAnecdote,
+    })
   }
 }
 

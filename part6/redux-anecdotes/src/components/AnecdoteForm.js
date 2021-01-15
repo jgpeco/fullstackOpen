@@ -12,8 +12,7 @@ const AnecdoteForm = () => {
         e.preventDefault()
         const anecdoteContent = e.target.anecdote.value
         e.target.anecdote.value = ''
-        const newAnecdote = await fetchHelper.createNew(anecdoteContent)
-        dispatch(createAnecdote(newAnecdote))
+        dispatch(createAnecdote(anecdoteContent))
         dispatch(showNotification('New Anecdote created succesfully!'))
 
         setTimeout(() => {  

@@ -3,8 +3,6 @@ import { createAnecdote } from '../reducers/anecdoteReducer'
 import { showNotification, hideNotification } from '../reducers/notificationReducer'
 import { useDispatch } from 'react-redux'
 
-import fetchHelper from '../services/anecdotes'
-
 const AnecdoteForm = () => {
     const dispatch = useDispatch()
 

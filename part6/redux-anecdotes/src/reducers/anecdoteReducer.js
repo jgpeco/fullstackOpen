@@ -22,10 +22,14 @@ export const createAnecdote = (anecdoteContent) => {
 }
 
 export const voteInAnecdote = (anecdote) => {
-  return {
-    type: 'VOTE',
-    data: anecdote,
+  return async dispatch => {
+    const votedAnecdote = await fetchHelper.vote(anecdote)
+    dispatch({
+      type: 'VOTE',
+      data: votedAnecdote,
+    })
   }
+
 }
 
 const anecdoteReducer = (state = [], action) => {
@@ -34,14 +38,8 @@ const anecdoteReducer = (state = [], action) => {
 
   switch(action.type) {
     case 'VOTE':
-      const anecdoteToVote = action.data
-      return state
-            .map(a => {
-              if(a.id === anecdoteToVote.id){
-                return {...anecdoteToVote, votes: anecdoteToVote.votes + 1}
-              }
-              return a
-          })
+      const aToVote = action.data
+      return state.map(a => a.id === aToVote.id ? aToVote : a )
     
     case 'INIT-ANECDOTES':
       return action.data

@@ -1,4 +1,5 @@
 const initialNotification = ''
+let timeout
 
 export const setNotification = (notification, time) => {
     return dispatch => {
@@ -7,7 +8,10 @@ export const setNotification = (notification, time) => {
             data: notification,
         })
 
-        setTimeout(() => {
+        if(timeout){
+            clearTimeout(timeout)
+        }
+        timeout = setTimeout(() => {
             dispatch({
                 type: 'SET_NOTIFICATION',
                 data: initialNotification,
@@ -17,8 +21,6 @@ export const setNotification = (notification, time) => {
 }
 
 const notificationReducer = (state = initialNotification, action) => {
-    console.log('notification state now: ', state)
-    console.log('notification action', action)
     
     switch(action.type){
         case 'SET_NOTIFICATION':
